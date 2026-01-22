@@ -94,6 +94,9 @@ jobs:
     environment:
       name: npm-production
       url: https://www.npmjs.com/package/@open-agent-economy/trust-sdk
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout code
@@ -130,13 +133,11 @@ jobs:
           npm version $VERSION --no-git-tag-version
           echo "Package version updated to $VERSION"
 
-      - name: Publish to NPM
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish to NPM (with provenance)
         run: |
-          echo "Publishing @open-agent-economy/trust-sdk@${{ steps.version.outputs.version }}..."
-          npm publish --access public
-          echo "Package published successfully!"
+          echo "Publishing @open-agent-economy/trust-sdk@${{ steps.version.outputs.version }} with provenance..."
+          npm publish --provenance --access public
+          echo "Package published successfully with provenance!"
 
       - name: Verify publication
         run: |
