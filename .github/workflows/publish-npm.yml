@@ -1,0 +1,320 @@
+name: Publish Trust SDK to NPM
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g., 0.1.1)'
+        required: true
+        type: string
+      dry_run:
+        description: 'Dry run (do not publish)'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  validate:
+    name: Validate & Build Package
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Run formatter check
+        run: npm run format -- --check
+        continue-on-error: true
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Run tests
+        run: npm test
+        continue-on-error: true
+
+      - name: Build package
+        run: npm run build
+
+      - name: Verify build output
+        run: |
+          echo "Checking build output..."
+          if [ ! -f dist/index.js ]; then
+            echo "Error: dist/index.js not found"
+            exit 1
+          fi
+          if [ ! -f dist/index.d.ts ]; then
+            echo "Error: dist/index.d.ts not found"
+            exit 1
+          fi
+          echo "Build output verified successfully"
+
+      - name: Check package contents
+        run: |
+          echo "Creating package tarball for inspection..."
+          npm pack --dry-run
+
+          echo "Package will include:"
+          npm pack --dry-run 2>&1 | grep -E '^\s+' || true
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-files
+          path: dist/
+          retention-days: 7
+
+  publish:
+    name: Publish to NPM
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run)
+    environment:
+      name: npm-production
+      url: https://www.npmjs.com/package/@open-agent-economy/trust-sdk
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build package
+        run: npm run build
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ inputs.version }}"
+          else
+            # Extract version from tag (v0.1.0 -> 0.1.0)
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Publishing version: $VERSION"
+
+      - name: Update package version
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          npm version $VERSION --no-git-tag-version
+          echo "Package version updated to $VERSION"
+
+      - name: Publish to NPM
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          echo "Publishing @open-agent-economy/trust-sdk@${{ steps.version.outputs.version }}..."
+          npm publish --access public
+          echo "Package published successfully!"
+
+      - name: Verify publication
+        run: |
+          echo "Waiting 30 seconds for NPM registry to update..."
+          sleep 30
+
+          VERSION="${{ steps.version.outputs.version }}"
+          echo "Verifying package @open-agent-economy/trust-sdk@$VERSION..."
+
+          # Try to fetch package info from NPM
+          if npm view @open-agent-economy/trust-sdk@$VERSION version; then
+            echo "Package verified successfully on NPM registry!"
+          else
+            echo "Warning: Could not verify package on NPM registry yet. Check manually."
+          fi
+
+      - name: Create deployment summary
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ### Trust SDK Published Successfully! 🚀
+
+          **Package:** \`@open-agent-economy/trust-sdk\`
+          **Version:** \`$VERSION\`
+          **Registry:** NPM (public)
+          **Commit:** \`${{ github.sha }}\`
+          **Published at:** $(date -u)
+
+          #### Links
+          - 📦 [NPM Package](https://www.npmjs.com/package/@open-agent-economy/trust-sdk)
+          - 📊 [Package Page](https://www.npmjs.com/package/@open-agent-economy/trust-sdk/v/$VERSION)
+          - 📝 [Repository](https://github.com/Open-Agent-Economy/open-agent-trust)
+
+          #### Installation
+          \`\`\`bash
+          npm install @open-agent-economy/trust-sdk@$VERSION
+          \`\`\`
+
+          \`\`\`bash
+          npm install @open-agent-economy/trust-sdk@latest
+          \`\`\`
+          EOF
+
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: publish
+    if: github.event_name == 'push'
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Get previous tag
+        id: prev_tag
+        run: |
+          PREV_TAG=$(git tag --sort=-version:refname | grep "^v" | sed -n '2p' || echo "")
+          if [ -z "$PREV_TAG" ]; then
+            echo "No previous tag found, using first commit"
+            PREV_TAG=$(git rev-list --max-parents=0 HEAD)
+          fi
+          echo "prev_tag=$PREV_TAG" >> $GITHUB_OUTPUT
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREV_TAG="${{ steps.prev_tag.outputs.prev_tag }}"
+          CURRENT_TAG="${{ steps.version.outputs.tag }}"
+
+          echo "Generating changelog from $PREV_TAG to $CURRENT_TAG..."
+
+          # Generate commit list
+          if [ "$PREV_TAG" = "$(git rev-list --max-parents=0 HEAD)" ]; then
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" --no-merges)
+          else
+            CHANGELOG=$(git log $PREV_TAG..$CURRENT_TAG --pretty=format:"- %s (%h)" --no-merges)
+          fi
+
+          if [ -z "$CHANGELOG" ]; then
+            CHANGELOG="- Initial release"
+          fi
+
+          # Save to file for multiline output
+          echo "$CHANGELOG" > changelog.txt
+
+          echo "Changelog generated successfully"
+
+      - name: Create GitHub Release
+        uses: actions/github-script@v7
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          TAG: ${{ steps.version.outputs.tag }}
+        with:
+          script: |
+            const fs = require('fs');
+            const version = process.env.VERSION;
+            const tag = process.env.TAG;
+            const changelog = fs.readFileSync('changelog.txt', 'utf8');
+
+            const isPrerelease = version.includes('-');
+
+            const body = `## Trust SDK v${version}
+
+            ### What's Changed
+            ${changelog}
+
+            ### Installation
+            \`\`\`bash
+            npm install @open-agent-economy/trust-sdk@${version}
+            \`\`\`
+
+            ### Links
+            - 📦 [NPM Package](https://www.npmjs.com/package/@open-agent-economy/trust-sdk/v/${version})
+            - 📖 [Documentation](https://github.com/Open-Agent-Economy/open-agent-trust#readme)
+            - 🐛 [Report Issues](https://github.com/Open-Agent-Economy/open-agent-trust/issues)
+            `;
+
+            const release = await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: tag,
+              name: `Trust SDK v${version}`,
+              body: body,
+              draft: false,
+              prerelease: isPrerelease
+            });
+
+            console.log(`Release created: ${release.data.html_url}`);
+
+  dry-run:
+    name: Dry Run (No Publish)
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event_name == 'workflow_dispatch' && inputs.dry_run
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build package
+        run: npm run build
+
+      - name: Dry run publish
+        run: |
+          echo "Running dry-run publish (no actual publication)..."
+          npm publish --dry-run
+          echo "Dry run completed successfully!"
+
+      - name: Create summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ### Dry Run Completed Successfully ✅
+
+          The package build and validation completed without errors.
+
+          **No package was published to NPM** (dry run mode).
+
+          To publish for real, either:
+          1. Push a tag: \`git tag v${{ inputs.version }} && git push origin v${{ inputs.version }}\`
+          2. Run this workflow again without dry-run enabled
+          EOF

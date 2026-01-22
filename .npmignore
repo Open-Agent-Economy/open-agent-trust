@@ -1,0 +1,50 @@
+# Source files (we only publish dist/)
+src/
+*.ts
+!*.d.ts
+
+# Tests
+__tests__/
+*.test.ts
+*.spec.ts
+coverage/
+
+# Configuration files
+tsconfig.json
+.eslintrc.json
+.prettierrc
+.prettierignore
+jest.config.js
+
+# Development files
+.git/
+.github/
+.vscode/
+.idea/
+*.log
+*.tgz
+
+# Documentation (keep README.md)
+docs/
+CONTRIBUTING.md
+
+# Environment and lock files
+.env
+.env.*
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build artifacts (except dist/)
+*.map
+!dist/**/*.map
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~

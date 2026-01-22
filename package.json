@@ -9,7 +9,11 @@
     "dev": "tsc --watch",
     "test": "jest",
     "lint": "eslint src --ext .ts",
-    "format": "prettier --write 'src/**/*.ts'"
+    "format": "prettier --write 'src/**/*.ts'",
+    "prepublishOnly": "npm run build && npm run lint",
+    "prepack": "npm run build",
+    "version": "npm run format && git add -A src",
+    "postversion": "git push && git push --tags"
   },
   "keywords": [
     "agent",
