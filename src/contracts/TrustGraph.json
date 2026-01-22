@@ -1,0 +1,114 @@
+[
+  {
+    "type": "function",
+    "name": "setTrust",
+    "inputs": [
+      { "name": "toAgent", "type": "uint256" },
+      { "name": "trustLevel", "type": "uint8" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "removeTrust",
+    "inputs": [{ "name": "toAgent", "type": "uint256" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "submitAttestation",
+    "inputs": [
+      { "name": "toAgent", "type": "uint256" },
+      { "name": "namespace", "type": "string" },
+      { "name": "tag", "type": "string" },
+      { "name": "score", "type": "uint8" },
+      { "name": "interactionId", "type": "bytes32" },
+      { "name": "comment", "type": "string" }
+    ],
+    "outputs": [{ "name": "attestationId", "type": "bytes32" }],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "getTrustLevel",
+    "inputs": [
+      { "name": "fromAgent", "type": "uint256" },
+      { "name": "toAgent", "type": "uint256" }
+    ],
+    "outputs": [{ "name": "", "type": "uint8" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getTrustedAgents",
+    "inputs": [{ "name": "agentId", "type": "uint256" }],
+    "outputs": [{ "name": "", "type": "uint256[]" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getAttestation",
+    "inputs": [{ "name": "attestationId", "type": "bytes32" }],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple",
+        "components": [
+          { "name": "fromAgent", "type": "uint256" },
+          { "name": "toAgent", "type": "uint256" },
+          { "name": "namespace", "type": "string" },
+          { "name": "tag", "type": "string" },
+          { "name": "score", "type": "uint8" },
+          { "name": "interactionId", "type": "bytes32" },
+          { "name": "comment", "type": "string" },
+          { "name": "timestamp", "type": "uint64" }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getAttestations",
+    "inputs": [{ "name": "agentId", "type": "uint256" }],
+    "outputs": [{ "name": "", "type": "bytes32[]" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getAttestationsByTag",
+    "inputs": [
+      { "name": "agentId", "type": "uint256" },
+      { "name": "namespace", "type": "string" },
+      { "name": "tag", "type": "string" }
+    ],
+    "outputs": [{ "name": "", "type": "bytes32[]" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "event",
+    "name": "AttestationSubmitted",
+    "inputs": [
+      { "name": "attestationId", "type": "bytes32", "indexed": true },
+      { "name": "fromAgent", "type": "uint256", "indexed": true },
+      { "name": "toAgent", "type": "uint256", "indexed": true },
+      { "name": "namespace", "type": "string", "indexed": false },
+      { "name": "tag", "type": "string", "indexed": false },
+      { "name": "score", "type": "uint8", "indexed": false },
+      { "name": "interactionId", "type": "bytes32", "indexed": false },
+      { "name": "timestamp", "type": "uint64", "indexed": false }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "TrustUpdated",
+    "inputs": [
+      { "name": "fromAgent", "type": "uint256", "indexed": true },
+      { "name": "toAgent", "type": "uint256", "indexed": true },
+      { "name": "trustLevel", "type": "uint8", "indexed": false },
+      { "name": "timestamp", "type": "uint64", "indexed": false }
+    ]
+  }
+]

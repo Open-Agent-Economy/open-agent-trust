@@ -1,0 +1,66 @@
+[
+  {
+    "type": "function",
+    "name": "registerInteraction",
+    "inputs": [
+      { "name": "agentA", "type": "uint256" },
+      { "name": "agentB", "type": "uint256" },
+      { "name": "interactionHash", "type": "bytes32" },
+      { "name": "interactionType", "type": "string" }
+    ],
+    "outputs": [{ "name": "interactionId", "type": "bytes32" }],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "hasInteracted",
+    "inputs": [
+      { "name": "agentA", "type": "uint256" },
+      { "name": "agentB", "type": "uint256" }
+    ],
+    "outputs": [{ "name": "", "type": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getInteraction",
+    "inputs": [{ "name": "interactionId", "type": "bytes32" }],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple",
+        "components": [
+          { "name": "agentA", "type": "uint256" },
+          { "name": "agentB", "type": "uint256" },
+          { "name": "interactionHash", "type": "bytes32" },
+          { "name": "interactionType", "type": "string" },
+          { "name": "timestamp", "type": "uint64" },
+          { "name": "verified", "type": "bool" }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getInteractionsBetween",
+    "inputs": [
+      { "name": "agentA", "type": "uint256" },
+      { "name": "agentB", "type": "uint256" }
+    ],
+    "outputs": [{ "name": "", "type": "bytes32[]" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "event",
+    "name": "InteractionRegistered",
+    "inputs": [
+      { "name": "interactionId", "type": "bytes32", "indexed": true },
+      { "name": "agentA", "type": "uint256", "indexed": true },
+      { "name": "agentB", "type": "uint256", "indexed": true },
+      { "name": "interactionType", "type": "string", "indexed": false },
+      { "name": "interactionHash", "type": "bytes32", "indexed": false },
+      { "name": "timestamp", "type": "uint64", "indexed": false }
+    ]
+  }
+]
