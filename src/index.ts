@@ -101,7 +101,9 @@ export class AgentTrustSDK {
    * Register a new interaction between two agents
    * Returns the transaction hash
    */
-  async registerInteraction(params: RegisterInteractionParams): Promise<{interactionId: string, txHash: string}> {
+  async registerInteraction(
+    params: RegisterInteractionParams
+  ): Promise<{ interactionId: string; txHash: string }> {
     if (!this.signer) throw new Error('Signer required for write operations');
 
     const agentA = await this.getAgentId();
@@ -128,11 +130,9 @@ export class AgentTrustSDK {
     const eventFragment = this.interactionRegistry.interface.getEvent('InteractionRegistered');
     if (!eventFragment) throw new Error('InteractionRegistered event not found');
 
-    const event = receipt.logs.find((log: any) =>
-      log.topics[0] === eventFragment.topicHash
-    );
+    const event = receipt.logs.find((log: any) => log.topics[0] === eventFragment.topicHash);
 
-    return {interactionId: event?.topics[1] || '', txHash: receipt.hash}; // Return interaction ID
+    return { interactionId: event?.topics[1] || '', txHash: receipt.hash }; // Return interaction ID
   }
 
   /**
@@ -187,9 +187,7 @@ export class AgentTrustSDK {
     const eventFragment = this.schemaRegistry.interface.getEvent('SchemaRegistered');
     if (!eventFragment) throw new Error('SchemaRegistered event not found');
 
-    const event = receipt.logs.find((log: any) =>
-      log.topics[0] === eventFragment.topicHash
-    );
+    const event = receipt.logs.find((log: any) => log.topics[0] === eventFragment.topicHash);
 
     return event?.topics[1] || ''; // Return schema ID
   }
@@ -314,11 +312,7 @@ export class AgentTrustSDK {
   /**
    * Get attestations by tag
    */
-  async getAttestationsByTag(
-    agentId: bigint,
-    namespace: string,
-    tag: string
-  ): Promise<string[]> {
+  async getAttestationsByTag(agentId: bigint, namespace: string, tag: string): Promise<string[]> {
     return await this.trustGraph.getAttestationsByTag(agentId, namespace, tag);
   }
 
@@ -341,21 +335,15 @@ export class AgentTrustSDK {
     const attestationIds = await this.getAttestations(agentId);
 
     // Fetch all attestation details
-    const attestations = await Promise.all(
-      attestationIds.map(id => this.getAttestation(id))
-    );
+    const attestations = await Promise.all(attestationIds.map((id) => this.getAttestation(id)));
 
     // Filter by namespace/tag if specified
     let filteredAttestations = attestations;
     if (query?.namespace) {
-      filteredAttestations = filteredAttestations.filter(
-        a => a.namespace === query.namespace
-      );
+      filteredAttestations = filteredAttestations.filter((a) => a.namespace === query.namespace);
     }
     if (query?.tag) {
-      filteredAttestations = filteredAttestations.filter(
-        a => a.tag === query.tag
-      );
+      filteredAttestations = filteredAttestations.filter((a) => a.tag === query.tag);
     }
 
     // Group by category
@@ -374,9 +362,8 @@ export class AgentTrustSDK {
 
     // Calculate overall (simple average for now)
     const allScores = Object.values(categoryScores);
-    const overall = allScores.length > 0
-      ? allScores.reduce((a, b) => a + b, 0) / allScores.length
-      : 0;
+    const overall =
+      allScores.length > 0 ? allScores.reduce((a, b) => a + b, 0) / allScores.length : 0;
 
     // Simple decay factor (1% per day, simplified)
     const decayFactor = 0.98;
