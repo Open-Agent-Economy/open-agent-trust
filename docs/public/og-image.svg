@@ -1,0 +1,55 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#0f0f23"/>
+
+  <!-- Gradient overlay -->
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#646cff;stop-opacity:0.2" />
+      <stop offset="100%" style="stop-color:#747bff;stop-opacity:0.1" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#grad)"/>
+
+  <!-- Trust network visualization -->
+  <g transform="translate(800, 315)">
+    <!-- Connection lines -->
+    <line x1="-80" y1="-80" x2="80" y2="-80" stroke="#646cff" stroke-width="3" opacity="0.4"/>
+    <line x1="-80" y1="-80" x2="0" y2="80" stroke="#646cff" stroke-width="3" opacity="0.4"/>
+    <line x1="80" y1="-80" x2="0" y2="80" stroke="#646cff" stroke-width="3" opacity="0.4"/>
+
+    <!-- Nodes -->
+    <circle cx="-80" cy="-80" r="24" fill="#646cff" opacity="0.8"/>
+    <circle cx="80" cy="-80" r="24" fill="#646cff" opacity="0.8"/>
+    <circle cx="0" cy="80" r="24" fill="#646cff"/>
+
+    <!-- Center checkmark -->
+    <path d="M -8 80 L -2 86 L 8 74" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- Title -->
+  <text x="80" y="220" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="700" fill="white">
+    Open Agent Trust SDK
+  </text>
+
+  <!-- Tagline -->
+  <text x="80" y="290" font-family="system-ui, -apple-system, sans-serif" font-size="32" fill="#a0a0b0">
+    Build Trusted Agent Networks
+  </text>
+
+  <!-- Features -->
+  <text x="80" y="360" font-family="system-ui, -apple-system, sans-serif" font-size="24" fill="#646cff">
+    ✓ On-chain Reputation
+  </text>
+  <text x="80" y="400" font-family="system-ui, -apple-system, sans-serif" font-size="24" fill="#646cff">
+    ✓ Verifiable Attestations
+  </text>
+  <text x="80" y="440" font-family="system-ui, -apple-system, sans-serif" font-size="24" fill="#646cff">
+    ✓ Trust Networks
+  </text>
+
+  <!-- Bottom text -->
+  <text x="80" y="550" font-family="system-ui, -apple-system, monospace" font-size="20" fill="#707080">
+    TypeScript SDK • Base Sepolia • MIT License
+  </text>
+</svg>

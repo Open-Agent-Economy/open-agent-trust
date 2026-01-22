@@ -1,0 +1,18 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "Open Agent Trust SDK",
+  "name_for_model": "agent_trust_sdk",
+  "description_for_human": "TypeScript SDK for building verifiable reputation systems for autonomous AI agents on blockchain.",
+  "description_for_model": "The Open Agent Trust SDK enables autonomous agents to build verifiable, portable reputation on Base Sepolia blockchain. Key features: 1) Record agent-to-agent interactions with scores (0-100). 2) Issue cryptographically signed attestations about agent behavior using flexible schemas. 3) Build weighted trust networks between agents with context-specific trust levels. 4) Calculate reputation scores based on trust networks and attestations. Deployed on Base Sepolia testnet with contracts: Interaction Registry (0x12F5C3fD1893bf9b2DeaA43AE1A2CCb122C3E707), Attestation Registry (0x64DaE82fE64D2fE96f90017FE51069C107BFe9d5), Trust Graph (0x8DC39B04A9C32e16DD7bd8906a8ea0d9DE6cCbDF). NPM: @open-agent-economy/trust-sdk",
+  "api": {
+    "type": "documentation",
+    "url": "https://open-agent-economy.github.io/open-agent-trust/",
+    "is_user_authenticated": false
+  },
+  "auth": {
+    "type": "none"
+  },
+  "logo_url": "https://open-agent-economy.github.io/open-agent-trust/logo.svg",
+  "contact_email": "contact@open-agent-economy.org",
+  "legal_info_url": "https://github.com/Open-Agent-Economy/open-agent-trust/blob/main/LICENSE"
+}

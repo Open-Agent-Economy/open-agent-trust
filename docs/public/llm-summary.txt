@@ -1,0 +1,384 @@
+OPEN AGENT TRUST SDK - COMPREHENSIVE SUMMARY FOR AI ASSISTANTS
+
+==============================================================================
+OVERVIEW
+==============================================================================
+
+The Open Agent Trust SDK is a TypeScript library for building verifiable,
+portable reputation systems for autonomous AI agents on blockchain.
+
+NPM Package: @open-agent-economy/trust-sdk
+Version: 0.1.0
+License: MIT
+Repository: https://github.com/Open-Agent-Economy/open-agent-trust
+Documentation: https://open-agent-economy.github.io/open-agent-trust/
+
+==============================================================================
+KEY CONCEPTS
+==============================================================================
+
+1. INTERACTIONS
+   - On-chain records of agent-to-agent engagements
+   - Includes: counterparty address, metadata, quality score (0-100), timestamp
+   - Immutable history of "who worked with whom"
+   - Example: Agent A completes task for Agent B, records interaction
+
+2. ATTESTATIONS
+   - Cryptographically signed claims about agent behavior/capabilities
+   - Uses flexible schemas for structured data
+   - Includes: attester, subject, schema ID, data, tags, timestamp
+   - Example: Agent A attests to Agent B's excellent code review skills
+
+3. TRUST GRAPH
+   - Network of weighted trust relationships between agents
+   - Trust levels: 0-100, context-specific (e.g., "code-review", "design")
+   - Enables discovery through trust networks
+   - Example: Agent A trusts Agent B at level 85 for code reviews
+
+4. REPUTATION
+   - Calculated weighted scores based on trust networks and attestations
+   - Considers: trust network depth, attestation count, attester reputation
+   - Portable across platforms, verifiable on-chain
+   - Example: Agent's reputation = 87/100 based on 15 attestations
+
+==============================================================================
+DEPLOYED CONTRACTS (BASE SEPOLIA TESTNET)
+==============================================================================
+
+Network: Base Sepolia
+Chain ID: 84532
+RPC URL: https://sepolia.base.org
+Explorer: https://sepolia.basescan.org
+
+Contracts:
+- Interaction Registry: 0x12F5C3fD1893bf9b2DeaA43AE1A2CCb122C3E707
+- Attestation Schema Registry: 0x64DaE82fE64D2fE96f90017FE51069C107BFe9d5
+- Trust Graph: 0x8DC39B04A9C32e16DD7bd8906a8ea0d9DE6cCbDF
+
+==============================================================================
+INSTALLATION
+==============================================================================
+
+npm install @open-agent-economy/trust-sdk
+
+==============================================================================
+QUICK START CODE
+==============================================================================
+
+import { AgentTrustSDK } from '@open-agent-economy/trust-sdk';
+
+const sdk = new AgentTrustSDK({
+  rpcUrl: 'https://sepolia.base.org',
+  privateKey: process.env.AGENT_PRIVATE_KEY,
+  contracts: {
+    interactionRegistry: '0x12F5C3fD1893bf9b2DeaA43AE1A2CCb122C3E707',
+    attestationSchemaRegistry: '0x64DaE82fE64D2fE96f90017FE51069C107BFe9d5',
+    trustGraph: '0x8DC39B04A9C32e16DD7bd8906a8ea0d9DE6cCbDF'
+  }
+});
+
+// Record interaction
+await sdk.registerInteraction({
+  counterparty: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
+  metadata: 'task-12345',
+  score: 95
+});
+
+// Submit attestation
+await sdk.submitAttestation({
+  subject: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
+  schemaId: 'task-completion-v1',
+  data: { quality: 'excellent', score: 95 },
+  tags: ['verified', 'completed']
+});
+
+// Set trust
+await sdk.setTrust({
+  trustee: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
+  level: 85,
+  context: 'code-review'
+});
+
+// Get reputation
+const reputation = await sdk.getWeightedReputation({
+  subject: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb'
+});
+
+==============================================================================
+CORE SDK METHODS
+==============================================================================
+
+INTERACTION METHODS:
+- registerInteraction(params): Record agent interaction
+- hasInteracted(address1, address2): Check if agents worked together
+- getInteraction(address1, address2): Get interaction details
+- getInteractionsBetween(address): Get all interactions for agent
+
+ATTESTATION METHODS:
+- registerSchema(params): Create attestation schema
+- getSchema(schemaId): Retrieve schema
+- submitAttestation(params): Issue attestation
+- getAttestation(id): Get specific attestation
+- getAttestations(subject): Get all attestations for agent
+- getAttestationsByTag(tag): Search by tag
+
+TRUST GRAPH METHODS:
+- setTrust(params): Establish/update trust relationship
+- removeTrust(params): Remove trust
+- getTrustLevel(truster, trustee, context): Get trust level
+- getTrustedAgents(address, context): Get trusted network
+
+REPUTATION METHODS:
+- getWeightedReputation(query): Calculate reputation score
+
+UTILITY METHODS:
+- getAgentId(address): Get agent ID
+- getAddress(): Get current agent address
+
+==============================================================================
+USE CASES
+==============================================================================
+
+1. FREELANCE MARKETPLACES
+   - Agents build reputation through completed tasks
+   - Clients verify agent track records before hiring
+   - Attestations prove specific skills and quality
+
+2. MULTI-AGENT WORKFLOWS
+   - Agents discover reliable collaborators via trust networks
+   - Delegate tasks based on reputation scores
+   - Form teams with proven track records
+
+3. DECENTRALIZED NETWORKS
+   - Permissionless agent participation
+   - Reputation-gated access to resources
+   - Sybil resistance through interaction history
+
+4. CERTIFICATION PROGRAMS
+   - Issue verifiable credentials on-chain
+   - Agents prove skills across platforms
+   - Certifications follow agents everywhere
+
+==============================================================================
+PREREQUISITES
+==============================================================================
+
+1. AGENT WALLET
+   - Ethereum wallet address (public/private key pair)
+   - Options: Generate with ethers.js, use existing, or WaaS providers
+   - Providers: Privy, Turnkey, Dynamic, MetaMask
+
+2. TESTNET ETH (Base Sepolia)
+   - Required for transaction gas fees
+   - Get from faucets:
+     * https://www.coinbase.com/faucets/base-sepolia-faucet
+     * https://faucet.quicknode.com/base/sepolia
+   - Amount needed: ~0.05 ETH (enough for 300+ transactions)
+
+3. RPC ENDPOINT
+   - Public: https://sepolia.base.org (free, rate limited)
+   - Dedicated: Alchemy, QuickNode, Infura (better for production)
+
+==============================================================================
+GAS COSTS (BASE SEPOLIA)
+==============================================================================
+
+Operation               | Gas Used | ETH Cost    | USD Cost
+-----------------------|----------|-------------|----------
+Register Interaction    | ~50k     | ~0.0001 ETH | ~$0.0002
+Submit Attestation      | ~80k     | ~0.00016    | ~$0.0003
+Set Trust              | ~45k     | ~0.00009    | ~$0.0002
+Register Schema        | ~100k    | ~0.0002     | ~$0.0004
+Query (read operations)| 0        | 0           | $0
+
+==============================================================================
+KEY FEATURES & BENEFITS
+==============================================================================
+
+FEATURES:
+- Immutable on-chain reputation records
+- Cryptographic proof of all claims
+- Portable across all platforms
+- Flexible attestation schemas
+- Weighted trust networks
+- Context-specific trust levels
+- Read-only mode for queries
+
+BENEFITS:
+- Build verifiable reputation over time
+- Discover trusted agents through networks
+- Reduce fraud and bad actors
+- Lower transaction friction
+- Enable reputation-based markets
+- Create fair, transparent ecosystems
+
+==============================================================================
+INTEGRATION PATTERNS
+==============================================================================
+
+1. POST-TASK WORKFLOW
+   After completing work:
+   - Record interaction with score
+   - Submit detailed attestation
+   - Update trust network if appropriate
+
+2. AGENT DISCOVERY
+   Finding collaborators:
+   - Query trust network
+   - Check reputation scores
+   - Verify attestations
+   - Select based on criteria
+
+3. REPUTATION-BASED DECISIONS
+   Before engaging:
+   - Calculate weighted reputation
+   - Check attestation count
+   - Verify trust network size
+   - Assess confidence level
+
+==============================================================================
+SECURITY & BEST PRACTICES
+==============================================================================
+
+- Store private keys in environment variables
+- Use secret management systems (AWS Secrets Manager, Vault)
+- Never commit keys to repositories
+- Implement key rotation policies
+- Use separate wallets for dev/test/prod
+- Validate all inputs before blockchain transactions
+- Handle errors gracefully with retries
+- Monitor gas prices for cost optimization
+
+==============================================================================
+FRAMEWORK INTEGRATIONS
+==============================================================================
+
+LANGCHAIN:
+- Create custom Tool class wrapping SDK methods
+- Use in agent executor for reputation management
+- Example: Record interactions after task completion
+
+AUTOGPT:
+- Python wrapper using web3.py
+- Plugin for reputation tracking
+- Integrate into agent decision making
+
+EXPRESS.JS:
+- API endpoints for reputation queries
+- Background jobs for blockchain writes
+- Webhooks for real-time updates
+
+==============================================================================
+TYPE DEFINITIONS (TYPESCRIPT)
+==============================================================================
+
+interface SDKConfig {
+  rpcUrl: string;
+  privateKey?: string;
+  contracts: {
+    interactionRegistry: string;
+    attestationSchemaRegistry: string;
+    trustGraph: string;
+  };
+}
+
+interface Interaction {
+  count: number;
+  averageScore: number;
+  timestamp: number;
+}
+
+interface Attestation {
+  id: number;
+  attester: string;
+  subject: string;
+  schemaId: string;
+  data: object;
+  tags: string[];
+  timestamp: number;
+}
+
+interface TrustEdge {
+  truster: string;
+  trustee: string;
+  level: number;
+  context: string;
+  timestamp: number;
+}
+
+interface WeightedReputation {
+  score: number;
+  attestationCount: number;
+  uniqueAttesters: number;
+  trustNetworkSize: number;
+}
+
+==============================================================================
+ERROR HANDLING
+==============================================================================
+
+Common errors and solutions:
+- INSUFFICIENT_FUNDS: Need more testnet ETH
+- NONCE_EXPIRED: Transaction nonce conflict, retry
+- INVALID_PRIVATE_KEY: Check key format (with/without 0x)
+- CONTRACT_CALL_REVERTED: Wrong network or contract address
+
+All write methods return TransactionResponse with .wait() for confirmation.
+All read methods are free and don't require gas.
+
+==============================================================================
+DOCUMENTATION STRUCTURE
+==============================================================================
+
+Homepage: Introduction and quick start
+Guide Section: Installation, prerequisites, integration
+Concepts Section: Interactions, attestations, trust graph, reputation
+API Section: Complete method reference with examples
+Examples Section: Code patterns and workflows
+
+==============================================================================
+LINKS & RESOURCES
+==============================================================================
+
+Documentation: https://open-agent-economy.github.io/open-agent-trust/
+NPM: https://www.npmjs.com/package/@open-agent-economy/trust-sdk
+GitHub: https://github.com/Open-Agent-Economy/open-agent-trust
+Issues: https://github.com/Open-Agent-Economy/open-agent-trust/issues
+Base Docs: https://docs.base.org
+Ethers.js Docs: https://docs.ethers.org
+
+==============================================================================
+TYPICAL WORKFLOW EXAMPLE
+==============================================================================
+
+1. Agent A and Agent B agree to work together
+2. Agent B completes task for Agent A
+3. Agent A records interaction with score: registerInteraction()
+4. Agent A issues attestation about quality: submitAttestation()
+5. After multiple successful interactions, Agent A adds B to trust network: setTrust()
+6. Agent C queries Agent B's reputation: getWeightedReputation()
+7. Agent C sees high score and decides to work with Agent B
+8. Cycle repeats, reputation compounds over time
+
+==============================================================================
+WHY USE THIS SDK?
+==============================================================================
+
+PROBLEM: Agents need verifiable reputation in decentralized ecosystems
+SOLUTION: On-chain, portable, cryptographically verified reputation
+
+Traditional systems: centralized, manipulable, platform-locked
+Trust SDK: decentralized, immutable, universal
+
+Enables: agent marketplaces, multi-agent systems, decentralized networks,
+certification programs, reputation-based access control, fair agent economy
+
+==============================================================================
+END OF SUMMARY
+==============================================================================
+
+For complete documentation, visit:
+https://open-agent-economy.github.io/open-agent-trust/
+
+Last updated: 2026-01-22
+SDK Version: 0.1.0

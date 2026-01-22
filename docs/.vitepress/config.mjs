@@ -5,6 +5,12 @@ export default defineConfig({
   description: 'Build trusted agent networks with on-chain reputation and attestations',
   base: '/open-agent-trust/',
   ignoreDeadLinks: true,
+  lang: 'en-US',
+
+  // Improve LLM and SEO discovery
+  sitemap: {
+    hostname: 'https://open-agent-economy.github.io/open-agent-trust/'
+  },
 
   themeConfig: {
     logo: '/logo.svg',
@@ -120,10 +126,76 @@ export default defineConfig({
   },
 
   head: [
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }],
+    // Favicon and icons
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/open-agent-trust/og-image.svg' }],
     ['meta', { name: 'theme-color', content: '#646cff' }],
-    ['meta', { name: 'og:type', content: 'website' }],
-    ['meta', { name: 'og:locale', content: 'en' }],
-    ['meta', { name: 'og:site_name', content: 'Open Agent Trust SDK' }]
-  ]
+
+    // SEO meta tags
+    ['meta', { name: 'keywords', content: 'agent trust, autonomous agents, blockchain reputation, agent attestations, trust graph, agent economy, web3 agents, AI agents, on-chain reputation, decentralized trust, agent identity, smart contracts, Base Sepolia, TypeScript SDK, agent marketplace' }],
+    ['meta', { name: 'author', content: 'Open Agent Economy' }],
+    ['meta', { name: 'robots', content: 'index, follow' }],
+
+    // Open Graph / Facebook
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:url', content: 'https://open-agent-economy.github.io/open-agent-trust/' }],
+    ['meta', { property: 'og:title', content: 'Open Agent Trust SDK - Build Trusted Agent Networks' }],
+    ['meta', { property: 'og:description', content: 'TypeScript SDK for building verifiable, portable reputation systems for autonomous AI agents on blockchain. Record interactions, issue attestations, build trust networks, and calculate reputation scores.' }],
+    ['meta', { property: 'og:image', content: 'https://open-agent-economy.github.io/open-agent-trust/og-image.svg' }],
+    ['meta', { property: 'og:locale', content: 'en_US' }],
+    ['meta', { property: 'og:site_name', content: 'Open Agent Trust SDK' }],
+
+    // Twitter Card
+    ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+    ['meta', { name: 'twitter:url', content: 'https://open-agent-economy.github.io/open-agent-trust/' }],
+    ['meta', { name: 'twitter:title', content: 'Open Agent Trust SDK - Build Trusted Agent Networks' }],
+    ['meta', { name: 'twitter:description', content: 'TypeScript SDK for building verifiable reputation systems for autonomous AI agents. On-chain interactions, attestations, and trust graphs on Base Sepolia.' }],
+    ['meta', { name: 'twitter:image', content: 'https://open-agent-economy.github.io/open-agent-trust/og-image.svg' }],
+
+    // Additional meta for better indexing
+    ['meta', { name: 'application-name', content: 'Open Agent Trust SDK' }],
+    ['meta', { name: 'apple-mobile-web-app-title', content: 'Agent Trust SDK' }],
+    ['meta', { name: 'apple-mobile-web-app-capable', content: 'yes' }],
+    ['meta', { name: 'apple-mobile-web-app-status-bar-style', content: 'black' }],
+
+    // Canonical URL
+    ['link', { rel: 'canonical', href: 'https://open-agent-economy.github.io/open-agent-trust/' }],
+
+    // JSON-LD Structured Data for better LLM understanding
+    ['script', { type: 'application/ld+json' }, JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'SoftwareApplication',
+      'name': 'Open Agent Trust SDK',
+      'description': 'TypeScript SDK for building verifiable, portable reputation systems for autonomous AI agents on blockchain',
+      'applicationCategory': 'DeveloperApplication',
+      'operatingSystem': 'Cross-platform',
+      'offers': {
+        '@type': 'Offer',
+        'price': '0',
+        'priceCurrency': 'USD'
+      },
+      'author': {
+        '@type': 'Organization',
+        'name': 'Open Agent Economy'
+      },
+      'programmingLanguage': 'TypeScript',
+      'codeRepository': 'https://github.com/Open-Agent-Economy/open-agent-trust',
+      'softwareVersion': '0.1.0',
+      'keywords': 'agent trust, blockchain reputation, autonomous agents, attestations, trust graph, Web3, AI agents',
+      'url': 'https://open-agent-economy.github.io/open-agent-trust/',
+      'downloadUrl': 'https://www.npmjs.com/package/@open-agent-economy/trust-sdk',
+      'installUrl': 'https://www.npmjs.com/package/@open-agent-economy/trust-sdk'
+    })]
+  ],
+
+  // Add markdown config for better content structure
+  markdown: {
+    theme: {
+      light: 'github-light',
+      dark: 'github-dark'
+    },
+    lineNumbers: true,
+    headers: {
+      level: [2, 3]
+    }
+  }
 })

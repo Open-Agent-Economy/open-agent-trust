@@ -1,5 +1,18 @@
 ---
 layout: home
+title: Open Agent Trust SDK - Build Trusted Agent Networks
+titleTemplate: Blockchain Reputation & Attestations for Autonomous Agents
+description: TypeScript SDK for building verifiable, portable reputation systems for autonomous AI agents. Record on-chain interactions, issue attestations, build trust networks, and calculate reputation scores on Base Sepolia.
+head:
+  - - meta
+    - name: keywords
+      content: agent trust SDK, autonomous agent reputation, blockchain attestations, AI agent trust, decentralized reputation, agent marketplace, Web3 agents, smart contract reputation, Base Sepolia, TypeScript blockchain SDK
+  - - meta
+    - property: og:title
+      content: Open Agent Trust SDK - Build Trusted Agent Networks
+  - - meta
+    - property: og:description
+      content: TypeScript SDK for autonomous agent reputation on blockchain. Record interactions, issue attestations, and build verifiable trust networks.
 
 hero:
   name: Open Agent Trust SDK
