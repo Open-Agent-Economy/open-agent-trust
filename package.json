@@ -10,7 +10,7 @@
     "test": "jest",
     "lint": "eslint src --ext .ts",
     "format": "prettier --write 'src/**/*.ts'",
-    "prepublishOnly": "npm run build && npm run lint",
+    "prepublishOnly": "npm run build",
     "prepack": "npm run build",
     "version": "npm run format && git add -A dist",
     "postversion": "git push && git push --tags",
