@@ -1,5 +1,5 @@
 {
-  "name": "@open-agent-trust/sdk",
+  "name": "@open-agent-economy/trust-sdk",
   "version": "0.1.0",
   "description": "TypeScript SDK for Open Agent Trust & Reputation Protocol",
   "main": "dist/index.js",
@@ -38,6 +38,9 @@
     "dist",
     "README.md"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/Open-Agent-Economy/open-agent-trust.git",
