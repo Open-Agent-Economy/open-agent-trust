@@ -1,0 +1,56 @@
+[
+    {
+        "type": "function",
+        "name": "registerSchema",
+        "inputs": [
+            { "name": "namespace", "type": "string" },
+            { "name": "name", "type": "string" },
+            { "name": "description", "type": "string" },
+            { "name": "allowedTags", "type": "string[]" },
+            { "name": "minScore", "type": "uint8" },
+            { "name": "maxScore", "type": "uint8" }
+        ],
+        "outputs": [{ "name": "schemaId", "type": "bytes32" }],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "isSchemaActive",
+        "inputs": [{ "name": "namespace", "type": "string" }],
+        "outputs": [{ "name": "", "type": "bool" }],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "getSchemaByNamespace",
+        "inputs": [{ "name": "namespace", "type": "string" }],
+        "outputs": [
+            {
+                "name": "",
+                "type": "tuple",
+                "components": [
+                    { "name": "namespace", "type": "string" },
+                    { "name": "name", "type": "string" },
+                    { "name": "description", "type": "string" },
+                    { "name": "allowedTags", "type": "string[]" },
+                    { "name": "minScore", "type": "uint8" },
+                    { "name": "maxScore", "type": "uint8" },
+                    { "name": "creator", "type": "address" },
+                    { "name": "createdAt", "type": "uint64" },
+                    { "name": "active", "type": "bool" }
+                ]
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "event",
+        "name": "SchemaRegistered",
+        "inputs": [
+            { "name": "schemaId", "type": "bytes32", "indexed": true },
+            { "name": "namespace", "type": "string", "indexed": true },
+            { "name": "name", "type": "string", "indexed": false },
+            { "name": "creator", "type": "address", "indexed": false }
+        ]
+    }
+]
