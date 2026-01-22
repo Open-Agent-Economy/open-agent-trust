@@ -263,14 +263,14 @@ class AgentTrustSDK {
         // Get all attestations
         const attestationIds = await this.getAttestations(agentId);
         // Fetch all attestation details
-        const attestations = await Promise.all(attestationIds.map(id => this.getAttestation(id)));
+        const attestations = await Promise.all(attestationIds.map((id) => this.getAttestation(id)));
         // Filter by namespace/tag if specified
         let filteredAttestations = attestations;
         if (query?.namespace) {
-            filteredAttestations = filteredAttestations.filter(a => a.namespace === query.namespace);
+            filteredAttestations = filteredAttestations.filter((a) => a.namespace === query.namespace);
         }
         if (query?.tag) {
-            filteredAttestations = filteredAttestations.filter(a => a.tag === query.tag);
+            filteredAttestations = filteredAttestations.filter((a) => a.tag === query.tag);
         }
         // Group by category
         const byCategory = {};
@@ -287,9 +287,7 @@ class AgentTrustSDK {
         }
         // Calculate overall (simple average for now)
         const allScores = Object.values(categoryScores);
-        const overall = allScores.length > 0
-            ? allScores.reduce((a, b) => a + b, 0) / allScores.length
-            : 0;
+        const overall = allScores.length > 0 ? allScores.reduce((a, b) => a + b, 0) / allScores.length : 0;
         // Simple decay factor (1% per day, simplified)
         const decayFactor = 0.98;
         // Simple risk level based on attestation count

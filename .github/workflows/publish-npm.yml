@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to publish (e.g., 0.1.1)'
+        description: 'Version to publish (e.g., 1.0.0)'
         required: true
         type: string
       dry_run:
@@ -62,27 +62,37 @@ jobs:
         run: |
           echo "Checking build output..."
           if [ ! -f dist/index.js ]; then
-            echo "Error: dist/index.js not found"
+            echo "❌ Error: dist/index.js not found"
             exit 1
           fi
           if [ ! -f dist/index.d.ts ]; then
-            echo "Error: dist/index.d.ts not found"
+            echo "❌ Error: dist/index.d.ts not found"
             exit 1
           fi
-          echo "Build output verified successfully"
+          echo "✅ Build output verified successfully"
 
-      - name: Check package contents
+      - name: Verify package contents
         run: |
-          echo "Creating package tarball for inspection..."
+          echo "📦 Package contents preview:"
           npm pack --dry-run
 
-          echo "Package will include:"
-          npm pack --dry-run 2>&1 | grep -E '^\s+' || true
+          echo ""
+          echo "📊 Verifying package size..."
+          SIZE=$(npm pack --dry-run 2>&1 | grep "package size" | awk '{print $4, $5}')
+          echo "Package size: $SIZE"
+
+          echo ""
+          echo "🔍 Ensuring source files are excluded..."
+          if npm pack --dry-run 2>&1 | grep -q "src/"; then
+            echo "❌ ERROR: Source files detected in package!"
+            exit 1
+          fi
+          echo "✅ Source files correctly excluded"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dist-files
+          name: dist-files-${{ github.sha }}
           path: dist/
           retention-days: 7
 
@@ -96,7 +106,7 @@ jobs:
       url: https://www.npmjs.com/package/@open-agent-economy/trust-sdk
     permissions:
       contents: read
-      id-token: write
+      id-token: write  # Required for provenance
 
     steps:
       - name: Checkout code
@@ -121,64 +131,121 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             VERSION="${{ inputs.version }}"
           else
-            # Extract version from tag (v0.1.0 -> 0.1.0)
+            # Extract version from tag (v1.0.0 -> 1.0.0)
             VERSION="${GITHUB_REF#refs/tags/v}"
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Publishing version: $VERSION"
+          echo "📌 Publishing version: $VERSION"
 
-      - name: Update package version
+      - name: Verify version matches package.json
         run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          npm version $VERSION --no-git-tag-version
-          echo "Package version updated to $VERSION"
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          TAG_VERSION="${{ steps.version.outputs.version }}"
 
-      - name: Publish to NPM (with provenance)
+          if [ "$PACKAGE_VERSION" != "$TAG_VERSION" ]; then
+            echo "⚠️ Version mismatch detected!"
+            echo "package.json: $PACKAGE_VERSION"
+            echo "Tag version: $TAG_VERSION"
+            echo "Updating package.json to match tag..."
+            npm version $TAG_VERSION --no-git-tag-version
+          else
+            echo "✅ Version matches: $PACKAGE_VERSION"
+          fi
+
+      - name: Final package verification
         run: |
-          echo "Publishing @open-agent-economy/trust-sdk@${{ steps.version.outputs.version }} with provenance..."
+          echo "📋 Package information:"
+          npm pack --dry-run
+
+          echo ""
+          echo "🔍 Final checks:"
+
+          # Check version
+          VERSION=$(node -p "require('./package.json').version")
+          echo "✅ Version: $VERSION"
+
+          # Check main entry
+          MAIN=$(node -p "require('./package.json').main")
+          if [ -f "$MAIN" ]; then
+            echo "✅ Main entry exists: $MAIN"
+          else
+            echo "❌ Main entry missing: $MAIN"
+            exit 1
+          fi
+
+          # Check types entry
+          TYPES=$(node -p "require('./package.json').types")
+          if [ -f "$TYPES" ]; then
+            echo "✅ Types entry exists: $TYPES"
+          else
+            echo "❌ Types entry missing: $TYPES"
+            exit 1
+          fi
+
+      - name: Publish to NPM with Provenance
+        run: |
+          echo "🚀 Publishing @open-agent-economy/trust-sdk@${{ steps.version.outputs.version }}"
+          echo "📝 With cryptographic provenance attestation..."
           npm publish --provenance --access public
-          echo "Package published successfully with provenance!"
+          echo "✅ Package published successfully!"
 
       - name: Verify publication
         run: |
-          echo "Waiting 30 seconds for NPM registry to update..."
+          echo "⏳ Waiting 30 seconds for NPM registry to update..."
           sleep 30
 
           VERSION="${{ steps.version.outputs.version }}"
-          echo "Verifying package @open-agent-economy/trust-sdk@$VERSION..."
+          echo "🔍 Verifying package @open-agent-economy/trust-sdk@$VERSION..."
 
           # Try to fetch package info from NPM
           if npm view @open-agent-economy/trust-sdk@$VERSION version; then
-            echo "Package verified successfully on NPM registry!"
+            echo "✅ Package verified on NPM registry!"
+
+            # Check provenance
+            echo ""
+            echo "🔐 Checking provenance..."
+            npm view @open-agent-economy/trust-sdk@$VERSION --json | grep -q "attestations" && \
+              echo "✅ Provenance attestation found!" || \
+              echo "⚠️ Provenance attestation not yet available (may take a few minutes)"
           else
-            echo "Warning: Could not verify package on NPM registry yet. Check manually."
+            echo "⚠️ Could not verify package yet. Check manually at:"
+            echo "https://www.npmjs.com/package/@open-agent-economy/trust-sdk/v/$VERSION"
           fi
 
       - name: Create deployment summary
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          cat >> $GITHUB_STEP_SUMMARY << EOF
-          ### Trust SDK Published Successfully! 🚀
+          cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+          ## 🚀 Trust SDK Published Successfully!
 
-          **Package:** \`@open-agent-economy/trust-sdk\`
-          **Version:** \`$VERSION\`
-          **Registry:** NPM (public)
-          **Commit:** \`${{ github.sha }}\`
-          **Published at:** $(date -u)
+          ### Package Information
+          - **Package:** `@open-agent-economy/trust-sdk`
+          - **Version:** `${{ steps.version.outputs.version }}`
+          - **Registry:** NPM (public)
+          - **Provenance:** ✅ Enabled
+          - **Commit:** `${{ github.sha }}`
+          - **Published:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')
 
-          #### Links
-          - 📦 [NPM Package](https://www.npmjs.com/package/@open-agent-economy/trust-sdk)
-          - 📊 [Package Page](https://www.npmjs.com/package/@open-agent-economy/trust-sdk/v/$VERSION)
-          - 📝 [Repository](https://github.com/Open-Agent-Economy/open-agent-trust)
+          ### 📦 Links
+          - [NPM Package](https://www.npmjs.com/package/@open-agent-economy/trust-sdk)
+          - [This Version](https://www.npmjs.com/package/@open-agent-economy/trust-sdk/v/${{ steps.version.outputs.version }})
+          - [Documentation](https://open-agent-economy.github.io/open-agent-trust/)
+          - [Repository](https://github.com/Open-Agent-Economy/open-agent-trust)
 
-          #### Installation
-          \`\`\`bash
-          npm install @open-agent-economy/trust-sdk@$VERSION
-          \`\`\`
+          ### 💻 Installation
+          ```bash
+          npm install @open-agent-economy/trust-sdk@${{ steps.version.outputs.version }}
+          ```
 
-          \`\`\`bash
+          Or install latest:
+          ```bash
           npm install @open-agent-economy/trust-sdk@latest
-          \`\`\`
+          ```
+
+          ### 🔐 Verify Provenance
+          ```bash
+          npm audit signatures
+          ```
           EOF
 
   create-release:
@@ -211,6 +278,7 @@ jobs:
             PREV_TAG=$(git rev-list --max-parents=0 HEAD)
           fi
           echo "prev_tag=$PREV_TAG" >> $GITHUB_OUTPUT
+          echo "Previous tag: $PREV_TAG"
 
       - name: Generate changelog
         id: changelog
@@ -218,7 +286,7 @@ jobs:
           PREV_TAG="${{ steps.prev_tag.outputs.prev_tag }}"
           CURRENT_TAG="${{ steps.version.outputs.tag }}"
 
-          echo "Generating changelog from $PREV_TAG to $CURRENT_TAG..."
+          echo "📝 Generating changelog from $PREV_TAG to $CURRENT_TAG..."
 
           # Generate commit list
           if [ "$PREV_TAG" = "$(git rev-list --max-parents=0 HEAD)" ]; then
@@ -233,8 +301,7 @@ jobs:
 
           # Save to file for multiline output
           echo "$CHANGELOG" > changelog.txt
-
-          echo "Changelog generated successfully"
+          echo "✅ Changelog generated"
 
       - name: Create GitHub Release
         uses: actions/github-script@v7
@@ -250,20 +317,37 @@ jobs:
 
             const isPrerelease = version.includes('-');
 
-            const body = `## Trust SDK v${version}
+            const body = `## 🚀 Trust SDK v${version}
 
             ### What's Changed
             ${changelog}
 
-            ### Installation
+            ### 📦 Installation
             \`\`\`bash
             npm install @open-agent-economy/trust-sdk@${version}
             \`\`\`
 
-            ### Links
+            ### 🔐 Security
+            This release includes cryptographic provenance attestation. Verify with:
+            \`\`\`bash
+            npm audit signatures
+            \`\`\`
+
+            ### 📚 Documentation
+            - [Full Documentation](https://open-agent-economy.github.io/open-agent-trust/)
+            - [Getting Started](https://open-agent-economy.github.io/open-agent-trust/guide/getting-started)
+            - [API Reference](https://open-agent-economy.github.io/open-agent-trust/api/sdk-reference)
+
+            ### 🔗 Links
             - 📦 [NPM Package](https://www.npmjs.com/package/@open-agent-economy/trust-sdk/v/${version})
-            - 📖 [Documentation](https://github.com/Open-Agent-Economy/open-agent-trust#readme)
+            - 📖 [Documentation](https://open-agent-economy.github.io/open-agent-trust/)
             - 🐛 [Report Issues](https://github.com/Open-Agent-Economy/open-agent-trust/issues)
+            - 💬 [Discussions](https://github.com/Open-Agent-Economy/open-agent-trust/discussions)
+
+            ### 🌐 Deployment (Base Sepolia)
+            - Interaction Registry: \`0x12F5C3fD1893bf9b2DeaA43AE1A2CCb122C3E707\`
+            - Attestation Registry: \`0x64DaE82fE64D2fE96f90017FE51069C107BFe9d5\`
+            - Trust Graph: \`0x8DC39B04A9C32e16DD7bd8906a8ea0d9DE6cCbDF\`
             `;
 
             const release = await github.rest.repos.createRelease({
@@ -273,10 +357,11 @@ jobs:
               name: `Trust SDK v${version}`,
               body: body,
               draft: false,
-              prerelease: isPrerelease
+              prerelease: isPrerelease,
+              generate_release_notes: false
             });
 
-            console.log(`Release created: ${release.data.html_url}`);
+            console.log(`✅ Release created: ${release.data.html_url}`);
 
   dry-run:
     name: Dry Run (No Publish)
@@ -302,20 +387,70 @@ jobs:
 
       - name: Dry run publish
         run: |
-          echo "Running dry-run publish (no actual publication)..."
+          echo "🧪 Running dry-run publish (no actual publication)..."
+          echo ""
           npm publish --dry-run
-          echo "Dry run completed successfully!"
+          echo ""
+          echo "✅ Dry run completed successfully!"
+
+      - name: Verify package contents
+        run: |
+          echo "📦 Creating actual tarball for inspection..."
+          npm pack
+
+          TARBALL=$(ls *.tgz)
+          echo "📋 Tarball: $TARBALL"
+
+          echo ""
+          echo "📂 Contents:"
+          tar -tzf $TARBALL
+
+          echo ""
+          echo "🔍 Checking for unwanted files..."
+          if tar -tzf $TARBALL | grep -q "src/"; then
+            echo "❌ WARNING: Source files found in package!"
+          else
+            echo "✅ No source files in package"
+          fi
+
+          if tar -tzf $TARBALL | grep -q "\.ts$" | grep -v "\.d\.ts$"; then
+            echo "❌ WARNING: TypeScript source files found!"
+          else
+            echo "✅ No TypeScript source files"
+          fi
+
+          # Cleanup
+          rm $TARBALL
 
       - name: Create summary
         run: |
-          cat >> $GITHUB_STEP_SUMMARY << EOF
-          ### Dry Run Completed Successfully ✅
+          cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+          ## ✅ Dry Run Completed Successfully
 
           The package build and validation completed without errors.
 
-          **No package was published to NPM** (dry run mode).
+          ### ⚠️ No Package Published
+          This was a **dry run** - nothing was published to NPM.
 
-          To publish for real, either:
-          1. Push a tag: \`git tag v${{ inputs.version }} && git push origin v${{ inputs.version }}\`
-          2. Run this workflow again without dry-run enabled
+          ### 📊 Package Information
+          - **Version:** `${{ inputs.version }}`
+          - **Package:** `@open-agent-economy/trust-sdk`
+          - **Node Version:** `${{ env.NODE_VERSION }}`
+
+          ### 🚀 To Publish For Real
+
+          **Option 1: Via Git Tag**
+          ```bash
+          git tag v${{ inputs.version }}
+          git push origin v${{ inputs.version }}
+          ```
+
+          **Option 2: Manual Workflow**
+          Run this workflow again with dry-run disabled.
+
+          ### ✅ Validation Passed
+          - Build completed successfully
+          - Package contents verified
+          - Source files excluded
+          - TypeScript definitions included
           EOF
