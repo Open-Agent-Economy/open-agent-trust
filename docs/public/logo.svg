@@ -1,0 +1,21 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="64" cy="64" r="60" fill="#646cff" opacity="0.1"/>
+
+  <!-- Trust network nodes (three connected circles) -->
+  <circle cx="45" cy="45" r="12" fill="#646cff" stroke="#646cff" stroke-width="2"/>
+  <circle cx="83" cy="45" r="12" fill="#646cff" stroke="#646cff" stroke-width="2"/>
+  <circle cx="64" cy="83" r="12" fill="#646cff" stroke="#646cff" stroke-width="2"/>
+
+  <!-- Connection lines -->
+  <line x1="45" y1="45" x2="83" y2="45" stroke="#646cff" stroke-width="3" opacity="0.6"/>
+  <line x1="45" y1="45" x2="64" y2="83" stroke="#646cff" stroke-width="3" opacity="0.6"/>
+  <line x1="83" y1="45" x2="64" y2="83" stroke="#646cff" stroke-width="3" opacity="0.6"/>
+
+  <!-- Checkmark in center node (trust symbol) -->
+  <path d="M 58 83 L 62 87 L 70 79" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Star/verification symbol in top nodes -->
+  <circle cx="45" cy="45" r="4" fill="white"/>
+  <circle cx="83" cy="45" r="4" fill="white"/>
+</svg>
