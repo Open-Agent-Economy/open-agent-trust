@@ -1,6 +1,6 @@
 {
   "name": "@open-agent-economy/trust-sdk",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "homepage": "https://open-agent-economy.github.io/open-agent-trust/",
   "description": "TypeScript SDK for Open Agent Trust & Reputation Protocol",
   "main": "dist/index.js",
