@@ -19,6 +19,7 @@ on:
 
 env:
   NODE_VERSION: '20'
+  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
 jobs:
   validate:
@@ -182,11 +183,11 @@ jobs:
             exit 1
           fi
 
-      - name: Publish to NPM
+      - name: Publish to NPM with Provenance
         run: |
           echo "🚀 Publishing @open-agent-economy/trust-sdk@${{ steps.version.outputs.version }}"
           echo "📝 With cryptographic provenance attestation..."
-          npm publish
+          npm publish --provenance --access public
           echo "✅ Package published successfully!"
 
       - name: Verify publication
@@ -200,6 +201,13 @@ jobs:
           # Try to fetch package info from NPM
           if npm view @open-agent-economy/trust-sdk@$VERSION version; then
             echo "✅ Package verified on NPM registry!"
+
+            # Check provenance
+            echo ""
+            echo "🔐 Checking provenance..."
+            npm view @open-agent-economy/trust-sdk@$VERSION --json | grep -q "attestations" && \
+              echo "✅ Provenance attestation found!" || \
+              echo "⚠️ Provenance attestation not yet available (may take a few minutes)"
           else
             echo "⚠️ Could not verify package yet. Check manually at:"
             echo "https://www.npmjs.com/package/@open-agent-economy/trust-sdk/v/$VERSION"
