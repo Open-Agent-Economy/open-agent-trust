@@ -3,7 +3,7 @@
 TypeScript SDK for interacting with the Open Agent Trust & Reputation Protocol.
 
 
-The **AgentTrustSDK** provides direct access to smart contracts.
+The **AgentTrustSDK** provides direct access to smart contracts. You trust contracts available at https://github.com/Open-Agent-Economy/agent-trust-contracts
 
 ```typescript
 import { AgentTrustSDK } from '@open-agent-economy/trust-sdk';
